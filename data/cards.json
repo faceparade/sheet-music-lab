@@ -6,5 +6,10 @@
   {"id":"whole-note","front":"𝅝","back":"Whole note — four beats in 4/4","hint":"One attack lasting a full measure."},
   {"id":"repeat","front":"𝄆 𝄇","back":"Repeat signs","hint":"Play the enclosed section again."},
   {"id":"treble-g","front":"Treble-clef second line","back":"G — the treble-clef landmark","hint":"The clef curls around the G line."},
-  {"id":"bass-f","front":"Bass-clef fourth line","back":"F — the bass-clef landmark","hint":"The two dots surround the F line."}
+  {"id":"bass-f","front":"Bass-clef fourth line","back":"F — the bass-clef landmark","hint":"The two dots surround the F line."},
+  {"id":"td07-snare","front":"◆ middle drum note","back":"Snare — the large center TD-07 pad","hint":"Say the mark, name, target, then relaxed center stroke."},
+  {"id":"td07-kick","front":"● low drum note","back":"Bass drum — TD-07 kick pedal and kick pad","hint":"One foot press makes one bass-drum attack."},
+  {"id":"td07-hihat","front":"× hi-hat note","back":"Closed hi-hat — left TD-07 cymbal pad","hint":"Keep hi-hat pedal down; strike with a relaxed tip."},
+  {"id":"td07-crash","front":"× high cymbal note","back":"Crash — right TD-07 crash cymbal pad","hint":"One edge strike, then let it ring."},
+  {"id":"td07-ride","front":"× ride-position note","back":"Ride — right TD-07 ride cymbal pad","hint":"Controlled tip stroke on the ride pad."}
 ]

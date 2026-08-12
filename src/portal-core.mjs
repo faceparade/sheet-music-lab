@@ -19,6 +19,39 @@ export function validateCurriculum(curriculum) {
   return errors;
 }
 
+export function auditLearningSequence(curriculum) {
+  const errors = [];
+  const known = new Set();
+  const lessonById = new Map(curriculum.lessons.map(lesson => [lesson.id, lesson]));
+
+  for (const lesson of curriculum.lessons) {
+    for (const concept of lesson.requires || []) {
+      if (!known.has(concept)) errors.push(`${lesson.id} requires ${concept} before it is introduced`);
+    }
+    for (const concept of lesson.introduces || []) {
+      if (!concept.id || !concept.symbol || !concept.meaning || !concept.target || !concept.action) {
+        errors.push(`${lesson.id} introduces an incomplete concept map`);
+        continue;
+      }
+      known.add(concept.id);
+    }
+    if (!lesson.recallPrompt || !lesson.execution) errors.push(`${lesson.id} must include recall before execution`);
+  }
+
+  for (const exercise of curriculum.exercises) {
+    const lesson = lessonById.get(exercise.lessonId);
+    const available = new Set();
+    for (const item of curriculum.lessons) {
+      for (const concept of item.introduces || []) available.add(concept.id);
+      if (item.id === lesson?.id) break;
+    }
+    for (const concept of exercise.requires || []) {
+      if (!available.has(concept)) errors.push(`${exercise.id} uses ${concept} before its lesson teaches it`);
+    }
+  }
+  return errors;
+}
+
 export function calculateProgress(curriculum, completedLessons = []) {
   if (!curriculum.lessons.length) return 0;
   const validIds = new Set(curriculum.lessons.map(lesson => lesson.id));
@@ -32,8 +65,7 @@ export function buildSession(curriculum, state = {}) {
   const blocks = [
     { type: 'review', title: 'Recall the symbols', minutes: 3, route: 'cards', detail: `${state.reviewDue || 0} cards due — learn these before reading` },
     { type: 'read', title: nextLesson?.title || 'Mixed sight-reading', minutes: 8, lessonId: nextLesson?.id, detail: nextLesson?.objective || 'New material' },
-    { type: 'coach', title: 'TD-07 timing check', minutes: 6, route: 'practice', detail: 'TIME CHECK, then one QUIET COUNT round' },
-    { type: 'pitch', title: 'Piano bridge', minutes: 5, lessonId: 'landmarks', detail: 'Landmark notes and keyboard mapping' }
+    { type: 'coach', title: 'TD-07 timing check', minutes: 6, route: 'practice', detail: 'TIME CHECK, then one QUIET COUNT round' }
   ];
   return { blocks, totalMinutes: blocks.reduce((sum, block) => sum + block.minutes, 0) };
 }

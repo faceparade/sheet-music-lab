@@ -5,8 +5,12 @@ import {
   calculateProgress,
   getDueCards,
   gradeCard,
-  validateCurriculum
+  validateCurriculum,
+  auditLearningSequence
 } from '../src/portal-core.mjs';
+import { readFile } from 'node:fs/promises';
+
+const productionCurriculum = JSON.parse(await readFile(new URL('../data/curriculum.json', import.meta.url)));
 
 const curriculum = {
   modules: [
@@ -28,14 +32,17 @@ test('curriculum references resolve', () => {
 
 test('daily session begins with recall and supplies destinations for every block', () => {
   const session = buildSession(curriculum, { completedLessons: [], reviewDue: 2 });
-  assert.equal(session.totalMinutes, 22);
-  assert.deepEqual(session.blocks.map(block => block.type), ['review', 'read', 'coach', 'pitch']);
+  assert.equal(session.totalMinutes, 17);
+  assert.deepEqual(session.blocks.map(block => block.type), ['review', 'read', 'coach']);
   assert.equal(session.blocks[0].title, 'Recall the symbols');
   assert.equal(session.blocks[0].route, 'cards');
   assert.equal(session.blocks[1].title, 'Find the pulse');
   assert.equal(session.blocks[1].lessonId, 'pulse-1');
   assert.equal(session.blocks[2].route, 'practice');
-  assert.equal(session.blocks[3].lessonId, 'landmarks');
+});
+
+test('production curriculum teaches every lesson concept before it asks for performance', () => {
+  assert.deepEqual(auditLearningSequence(productionCurriculum), []);
 });
 
 test('progress is based on unique completed lesson ids', () => {

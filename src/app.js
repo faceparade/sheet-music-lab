@@ -1,4 +1,4 @@
-import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum } from './portal-core.mjs';
+import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum, auditLearningSequence } from './portal-core.mjs';
 
 const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/curriculum.json').then(assertResponse).then(r => r.json()),
@@ -6,7 +6,7 @@ const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/resources.json').then(assertResponse).then(r => r.json())
 ]);
 
-const errors = validateCurriculum(curriculum);
+const errors = [...validateCurriculum(curriculum), ...auditLearningSequence(curriculum)];
 if (errors.length) throw new Error(errors.join('\n'));
 
 const STORAGE_KEY = 'sheet-music-lab-state-v1';
@@ -239,7 +239,8 @@ function openLesson(id) {
   const lesson = curriculum.lessons.find(item => item.id === id);
   if (!lesson) return;
   const complete = state.completedLessons.includes(id);
-  lessonDetail.innerHTML = `<span class="kicker">${esc(lesson.kind)} · ${lesson.minutes} minutes</span><h1>${esc(lesson.title)}</h1><div class="objective"><strong>Objective</strong><p>${esc(lesson.objective)}</p></div><h3>Studio sequence</h3><ol>${lesson.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol><div class="coach-box"><strong>FEEDBACK MODE</strong><p>${esc(lesson.coach)}</p></div><div class="hero-actions"><button class="button" id="finish-lesson">${complete ? 'Mark incomplete' : 'Complete lesson'}</button>${lesson.kind !== 'pitch' ? '<a class="button secondary" href="#practice" id="lesson-practice">Open rhythm lab</a>' : '<a class="button secondary" href="https://www.musicca.com/piano" target="_blank" rel="noreferrer">Open virtual piano</a>'}</div>`;
+  const conceptMap = lesson.introduces?.length ? `<section class="concept-map"><h3>Know this before you play</h3><p class="recall-prompt"><strong>Recall first:</strong> ${esc(lesson.recallPrompt)}</p>${lesson.introduces.map(concept => `<article class="concept-card"><strong>${esc(concept.symbol)}</strong><div><b>${esc(concept.meaning)}</b><p><b>TD-07 target:</b> ${esc(concept.target)}</p><p><b>Action:</b> ${esc(concept.action)}</p></div></article>`).join('')}</section>` : '';
+  lessonDetail.innerHTML = `<span class="kicker">${esc(lesson.kind)} · ${lesson.minutes} minutes</span><h1>${esc(lesson.title)}</h1><div class="objective"><strong>Objective</strong><p>${esc(lesson.objective)}</p></div>${conceptMap}<div class="execution"><strong>Then perform</strong><p>${esc(lesson.execution || '')}</p></div><h3>Studio sequence</h3><ol>${lesson.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol><div class="coach-box"><strong>FEEDBACK MODE</strong><p>${esc(lesson.coach)}</p></div><div class="hero-actions"><button class="button" id="finish-lesson">${complete ? 'Mark incomplete' : 'Complete lesson'}</button>${lesson.kind !== 'pitch' ? '<a class="button secondary" href="#practice" id="lesson-practice">Open rhythm lab</a>' : '<a class="button secondary" href="https://www.musicca.com/piano" target="_blank" rel="noreferrer">Open virtual piano</a>'}</div>`;
   document.querySelector('#finish-lesson').onclick = () => {
     state.completedLessons = complete ? state.completedLessons.filter(item => item !== id) : [...new Set([...state.completedLessons, id])];
     if (!complete) markPractice(); saveState(); dialog.close(); render(); notify(complete ? 'Lesson reopened.' : 'Lesson completed.');

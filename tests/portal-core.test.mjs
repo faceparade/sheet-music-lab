@@ -6,11 +6,13 @@ import {
   getDueCards,
   gradeCard,
   validateCurriculum,
-  auditLearningSequence
+  auditLearningSequence,
+  auditRecallCoverage
 } from '../src/portal-core.mjs';
 import { readFile } from 'node:fs/promises';
 
 const productionCurriculum = JSON.parse(await readFile(new URL('../data/curriculum.json', import.meta.url)));
+const productionCards = JSON.parse(await readFile(new URL('../data/cards.json', import.meta.url)));
 
 const curriculum = {
   modules: [
@@ -43,6 +45,10 @@ test('daily session begins with recall and supplies destinations for every block
 
 test('production curriculum teaches every lesson concept before it asks for performance', () => {
   assert.deepEqual(auditLearningSequence(productionCurriculum), []);
+});
+
+test('production curriculum supplies a recall card for every introduced concept', () => {
+  assert.deepEqual(auditRecallCoverage(productionCurriculum, productionCards), []);
 });
 
 test('progress is based on unique completed lesson ids', () => {

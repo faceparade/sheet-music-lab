@@ -52,6 +52,12 @@ export function auditLearningSequence(curriculum) {
   return errors;
 }
 
+export function auditRecallCoverage(curriculum, cards) {
+  const conceptIds = new Set(curriculum.lessons.flatMap(lesson => (lesson.introduces || []).map(concept => concept.id)));
+  const cardIds = new Set(cards.map(card => card.id));
+  return [...conceptIds].filter(id => !cardIds.has(id)).map(id => `Missing recall card for ${id}`);
+}
+
 export function calculateProgress(curriculum, completedLessons = []) {
   if (!curriculum.lessons.length) return 0;
   const validIds = new Set(curriculum.lessons.map(lesson => lesson.id));

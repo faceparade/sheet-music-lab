@@ -1,4 +1,4 @@
-import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum, auditLearningSequence } from './portal-core.mjs';
+import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum, auditLearningSequence, auditRecallCoverage } from './portal-core.mjs';
 
 const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/curriculum.json').then(assertResponse).then(r => r.json()),
@@ -6,7 +6,7 @@ const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/resources.json').then(assertResponse).then(r => r.json())
 ]);
 
-const errors = [...validateCurriculum(curriculum), ...auditLearningSequence(curriculum)];
+const errors = [...validateCurriculum(curriculum), ...auditLearningSequence(curriculum), ...auditRecallCoverage(curriculum, cards)];
 if (errors.length) throw new Error(errors.join('\n'));
 
 const STORAGE_KEY = 'sheet-music-lab-state-v1';
@@ -70,7 +70,9 @@ function render() {
   stopMetronome();
   const route = currentRoute();
   document.querySelectorAll('[data-route]').forEach(link => link.classList.toggle('active', link.dataset.route === route));
-  const pages = { dashboard: renderDashboard, course: renderCourse, practice: renderPractice, cards: renderCards, resources: renderResources };
+  const pages = { dashboard: renderDashboard, start: renderStart, kit: renderKitGuide, legend: renderLegend, help: renderHelp, course: renderCourse, practice: renderPractice, cards: renderCards, resources: renderResources };
+  const lessonRoute = route.match(/^lesson\/(.+)$/);
+  if (lessonRoute) { openLesson(lessonRoute[1]); return; }
   (pages[route] || renderDashboard)();
   document.querySelector('.sidebar').classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'instant' });
@@ -120,10 +122,36 @@ function renderDashboard() {
   bindLessonButtons();
 }
 
+function renderStart() {
+  setTitle('Start here');
+  view.innerHTML = `
+    <div class="intro"><span class="kicker">First visit · 10 minutes</span><h1>Set up once. Then follow one next step at a time.</h1><p>You do not need to read music or know drum names. This course teaches each mark, its TD-07 target, and the movement before it asks you to play.</p></div>
+    <section class="priority-panel panel"><span>START WITH THIS</span><h2>1. Learn your kit targets</h2><p>Find the snare, kick, hi-hat, crash, and ride from your seated position. You will use these names later.</p><a class="button" href="#kit">Open TD-07 kit guide</a></section>
+    <div class="path-steps"><article><span>02</span><h3>Learn the notation</h3><p>Use the short legend whenever a mark is unfamiliar.</p><a href="#legend">Open notation legend</a></article><article><span>03</span><h3>Begin the routine</h3><p>Recall first, take one lesson, then make one slow attempt.</p><a href="#dashboard">Go to today’s plan</a></article><article><span>04</span><h3>Use a recovery rule</h3><p>If something breaks, slow down and isolate one layer.</p><a href="#help">See troubleshooting</a></article></div>
+    <section class="section"><div class="section-head"><div><span>COMFORT & SAFETY</span><h2>Play without forcing it</h2></div></div><div class="supply-list"><div class="supply"><strong>Set your seat</strong><p>Sit high enough that thighs slope gently down. Keep the kick pedal close enough that you do not reach or lock your knee.</p></div><div class="supply"><strong>Use relaxed motion</strong><p>Keep shoulders loose. Let sticks rebound instead of pressing into the pad. Stop if you feel pain, numbness, or strain.</p></div><div class="supply"><strong>Protect your hearing</strong><p>Start headphone volume low. You should still be able to hear the click and play comfortably without ringing afterward.</p></div></div></section>`;
+}
+
+function renderKitGuide() {
+  setTitle('TD-07 kit guide');
+  view.innerHTML = `<div class="intro"><span class="kicker">Before your first groove</span><h1>Find each target from the player’s seat.</h1><p>“Left” and “right” below mean your left and right while seated at the TD-07. If your kit was customized, the sound assignment can differ—use the module’s kit settings or your TD-07 manual to confirm it.</p></div><section class="kit-map panel"><div class="kit-center"><b>YOU</b><small>seated player</small></div><div class="kit-target hat"><b>Left: HI-HAT</b><span>cymbal pad + pedal</span></div><div class="kit-target snare"><b>Center: SNARE</b><span>large middle pad</span></div><div class="kit-target kick"><b>Below: KICK</b><span>pedal + kick pad</span></div><div class="kit-target crash"><b>Right: CRASH</b><span>right cymbal pad</span></div><div class="kit-target ride"><b>Far right: RIDE</b><span>right ride pad</span></div></section><section class="section"><div class="section-head"><div><span>TOUCH CHECK</span><h2>Do this once, slowly</h2></div></div><ol class="plain-list"><li>Put on headphones and set a low, comfortable volume.</li><li>Tap the center snare pad once with a relaxed stick stroke.</li><li>Press the kick pedal once with a relaxed foot motion.</li><li>Hold the hi-hat pedal down, then tap the left cymbal pad for a closed hi-hat.</li><li>Tap the right crash and ride pads once each. Do not chase speed yet.</li></ol><div class="hero-actions"><a class="button" href="#legend">Next: learn the marks</a><a class="button secondary" href="#dashboard">I know my kit — begin today</a></div></section>`;
+}
+
+function renderLegend() {
+  setTitle('Notation legend');
+  const rows = [['♩','Quarter note','One sound for one beat.'],['𝄽','Quarter rest','One beat of silence; keep counting.'],['♫','Paired eighths','Two equal sounds: “1 &”.'],['×','Cymbal notehead','In this course, usually a hi-hat, crash, or ride; check its position.'],['◆','Snare note','Strike the center snare pad.'],['●','Bass-drum note','Press the kick pedal.'],['× + ●','Stacked notes','Play both targets at the same time.'],['♩⌒♩','Tie','Hold the time across two notes; do not strike again.'],['♩.','Dot','Adds half the note’s value.']];
+  view.innerHTML = `<div class="intro"><span class="kicker">Keep this nearby</span><h1>Read the marks used in this course.</h1><p>A measure is one small group of beats between barlines. In 4/4, count four steady beats: 1 2 3 4. Other drum books can use different placements, so always check that chart’s legend.</p></div><section class="legend-grid">${rows.map(([mark,name,meaning]) => `<article class="legend-item"><strong>${mark}</strong><div><h3>${name}</h3><p>${meaning}</p></div></article>`).join('')}</section><div class="priority-panel panel"><span>WHEN YOU SEE A NEW MARK</span><h2>Say it before you play it.</h2><p>Name the mark, identify the TD-07 target, rehearse the motion once, then add it to the count.</p><a class="button" href="#cards">Practice recall now</a></div>`;
+}
+
+function renderHelp() {
+  setTitle('Practice help');
+  const fixes = [['I lost the count','Stop, clap the rhythm while saying the count, and restart at half the tempo.'],['My hands and feet fall apart','Practice one limb, then two layers, then the full stack.'],['I rushed or dragged','Lower the tempo 5–10 BPM and let the click lead; do not fix it by speeding up.'],['My hi-hat sounds open','Hold the hi-hat pedal down before you strike the left cymbal pad.'],['I do not recognize a mark','Open the notation legend, then use its matching recall card before trying again.'],['I made a mistake in sight reading','Keep the pulse going. Circle the problem afterward and retry slowly.']];
+  view.innerHTML = `<div class="intro"><span class="kicker">Recovery, not failure</span><h1>When something goes wrong, make the task smaller.</h1><p>A slow, steady pass is more useful than a fast, tense one. Choose one fix below, then return to today’s next step.</p></div><section class="help-list">${fixes.map(([problem,fix]) => `<article><h2>${problem}</h2><p>${fix}</p></article>`).join('')}</section><section class="priority-panel panel"><span>READY TO MOVE ON?</span><h2>Use a simple mastery check.</h2><p>Move forward after you can name the marks without revealing them and make two steady, comfortable passes at the lesson tempo. If either part is shaky, repeat the short routine tomorrow.</p><a class="button" href="#dashboard">Return to today’s plan</a></section><section class="section"><div class="section-head"><div><span>FINISH LINE</span><h2>Foundation-course check</h2></div></div><div class="supply-list"><div class="supply"><strong>Recognize</strong><p>Identify rhythm values and the snare, kick, and cymbal marks without help.</p></div><div class="supply"><strong>Read</strong><p>Preview, count, and play two unfamiliar short lines without stopping.</p></div><div class="supply"><strong>Perform</strong><p>Keep a basic layered groove steady at a comfortable tempo. Then choose one focused next skill.</p></div></div></section>`;
+}
+
 function renderCourse() {
   setTitle('Course map');
   view.innerHTML = `
-    <div class="intro"><span class="kicker">Eight weeks · Sixteen lessons</span><h1>Build fluency in layers.</h1><p>Move through the path in order or open any lesson. Each lesson has one concrete objective, a short sequence, and a feedback method.</p></div>
+    <div class="intro"><span class="kicker">Eight weeks · Sixteen lessons</span><h1>Build fluency in layers.</h1><p>Move through the TD-07 path in order. Each lesson has one concrete objective, a short sequence, and a feedback method. <strong>The final Piano Bridge is optional support—not required for the TD-07 course.</strong></p></div>
     <div class="course-grid">${curriculum.modules.map(module => `
       <article class="module-card">
         <div class="module-head"><div class="week-badge">W${module.week}</div><div><h2>${esc(module.title)}</h2><p>${esc(module.summary)}</p></div></div>

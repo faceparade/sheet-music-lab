@@ -30,8 +30,8 @@ export function buildSession(curriculum, state = {}) {
   const completed = new Set(state.completedLessons || []);
   const nextLesson = curriculum.lessons.find(lesson => !completed.has(lesson.id)) || curriculum.lessons[0];
   const blocks = [
+    { type: 'review', title: 'Recall the symbols', minutes: 3, route: 'cards', detail: `${state.reviewDue || 0} cards due — learn these before reading` },
     { type: 'read', title: nextLesson?.title || 'Mixed sight-reading', minutes: 8, lessonId: nextLesson?.id, detail: nextLesson?.objective || 'New material' },
-    { type: 'review', title: 'Recall the symbols', minutes: 3, route: 'cards', detail: `${state.reviewDue || 0} cards due` },
     { type: 'coach', title: 'TD-07 timing check', minutes: 6, route: 'practice', detail: 'TIME CHECK, then one QUIET COUNT round' },
     { type: 'pitch', title: 'Piano bridge', minutes: 5, lessonId: 'landmarks', detail: 'Landmark notes and keyboard mapping' }
   ];

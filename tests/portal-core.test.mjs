@@ -26,10 +26,16 @@ test('curriculum references resolve', () => {
   assert.deepEqual(validateCurriculum(curriculum), []);
 });
 
-test('daily session mixes review, reading, coach work, and pitch', () => {
+test('daily session begins with the next lesson and supplies destinations for every block', () => {
   const session = buildSession(curriculum, { completedLessons: [], reviewDue: 2 });
   assert.equal(session.totalMinutes, 22);
-  assert.deepEqual(session.blocks.map(block => block.type), ['review', 'read', 'coach', 'pitch']);
+  assert.deepEqual(session.blocks.map(block => block.type), ['read', 'review', 'coach', 'pitch']);
+  assert.equal(session.blocks[0].title, 'Find the pulse');
+  assert.equal(session.blocks[0].lessonId, 'pulse-1');
+  assert.equal(session.blocks[1].title, 'Recall the symbols');
+  assert.equal(session.blocks[1].route, 'cards');
+  assert.equal(session.blocks[2].route, 'practice');
+  assert.equal(session.blocks[3].lessonId, 'landmarks');
 });
 
 test('progress is based on unique completed lesson ids', () => {

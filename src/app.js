@@ -94,8 +94,12 @@ function renderDashboard() {
       </article>
       <aside class="session-panel panel">
         <header><div><span>DAILY PLAN</span><h3>One focused pass</h3></div><strong>${session.totalMinutes}:00</strong></header>
-        <div class="session-list">${session.blocks.map((block, i) => `
-          <div class="session-item"><span class="num">0${i + 1}</span><div><strong>${esc(block.title)}</strong><small>${esc(block.detail || 'New material')}</small></div><span>${block.minutes}m</span></div>`).join('')}
+        <div class="session-list">${session.blocks.map((block, i) => {
+          const destination = block.lessonId
+            ? `<button class="session-item" data-open-lesson="${esc(block.lessonId)}" aria-label="Open ${esc(block.title)} lesson">`
+            : `<a class="session-item" href="#${esc(block.route || 'dashboard')}" aria-label="Open ${esc(block.title)}">`;
+          return `${destination}<span class="num">0${i + 1}</span><span class="session-copy"><strong>${esc(block.title)}</strong><small>${esc(block.detail || 'New material')}</small></span><span>${block.minutes}m</span>${block.lessonId ? '</button>' : '</a>'}`;
+        }).join('')}
         </div>
       </aside>
     </div>

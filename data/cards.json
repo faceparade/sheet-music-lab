@@ -1,0 +1,10 @@
+[
+  {"id":"quarter-note","front":"♩","back":"Quarter note — one beat in 4/4","hint":"Say and tap one numbered beat."},
+  {"id":"quarter-rest","front":"𝄽","back":"Quarter rest — one silent beat","hint":"Keep counting and move without striking."},
+  {"id":"eighth-notes","front":"♫","back":"Paired eighth notes — 1 &","hint":"Two equal sounds inside one beat."},
+  {"id":"half-note","front":"𝅗𝅥","back":"Half note — two beats","hint":"Attack once; count through the second beat."},
+  {"id":"whole-note","front":"𝅝","back":"Whole note — four beats in 4/4","hint":"One attack lasting a full measure."},
+  {"id":"repeat","front":"𝄆 𝄇","back":"Repeat signs","hint":"Play the enclosed section again."},
+  {"id":"treble-g","front":"Treble-clef second line","back":"G — the treble-clef landmark","hint":"The clef curls around the G line."},
+  {"id":"bass-f","front":"Bass-clef fourth line","back":"F — the bass-clef landmark","hint":"The two dots surround the F line."}
+]

@@ -1,0 +1,41 @@
+{
+  "title": "Sheet Music Lab",
+  "modules": [
+    {"id":"pulse","week":1,"title":"Pulse & Measures","summary":"Feel the beat and see how music is divided.","lessons":["pulse-map","quarter-grid"]},
+    {"id":"eighths","week":2,"title":"Eighth Notes & Rests","summary":"Read the beat and the spaces between beats.","lessons":["eighth-count","rest-space"]},
+    {"id":"meter","week":3,"title":"Meter & Ties","summary":"Move between 4/4, 3/4, and 2/4 without losing time.","lessons":["meter-shift","ties-dots"]},
+    {"id":"syncopation","week":4,"title":"Syncopation","summary":"Recognize offbeats as shapes instead of surprises.","lessons":["offbeat","mixed-review"]},
+    {"id":"sixteenths","week":5,"title":"Sixteenth Notes","summary":"Use 1-e-&-a to decode common rhythmic words.","lessons":["sixteenth-grid","change-up"]},
+    {"id":"kit","week":6,"title":"Drum-Set Reading","summary":"Map rhythm onto snare, bass, and hi-hat layers.","lessons":["kit-map","layer-groove"]},
+    {"id":"reading","week":7,"title":"Fluent Reading","summary":"Scan ahead, preserve tempo, and recover cleanly.","lessons":["read-ahead","unseen-sets"]},
+    {"id":"piano","week":8,"title":"Piano Bridge","summary":"Add landmark pitches, intervals, and keyboard geography.","lessons":["landmarks","interval-shapes"]}
+  ],
+  "lessons": [
+    {"id":"pulse-map","moduleId":"pulse","title":"Find the pulse","minutes":8,"kind":"rhythm","objective":"Keep a steady pulse through four measures.","coach":"TIME CHECK","steps":["Tap four beats before reading.","Count 1 2 3 4 aloud.","Play once without stopping."]},
+    {"id":"quarter-grid","moduleId":"pulse","title":"Quarter-note grid","minutes":8,"kind":"rhythm","objective":"Read quarter notes and rests in 4/4.","coach":"TIME CHECK","steps":["Name every symbol.","Clap the line.","Play at 60 BPM."]},
+    {"id":"eighth-count","moduleId":"eighths","title":"Count the &","minutes":10,"kind":"rhythm","objective":"Count paired eighth notes accurately.","coach":"TIME CHECK","steps":["Say 1 & 2 & 3 & 4 &.","Accent the numbered beats.","Play two unseen lines."]},
+    {"id":"rest-space","moduleId":"eighths","title":"Hear the silence","minutes":10,"kind":"rhythm","objective":"Keep time through eighth-note rests.","coach":"QUIET COUNT","steps":["Count through every rest.","Move your stick without striking.","Check whether beat one stays aligned."]},
+    {"id":"meter-shift","moduleId":"meter","title":"Change the measure","minutes":10,"kind":"rhythm","objective":"Read 2/4, 3/4, and 4/4.","coach":"TIME CHECK","steps":["Mark the strong beat.","Count one measure in.","Switch meter only between lines."]},
+    {"id":"ties-dots","moduleId":"meter","title":"Hold and connect","minutes":10,"kind":"rhythm","objective":"Perform ties and dotted values without adding attacks.","coach":"QUIET COUNT","steps":["Circle attacks.","Count held durations aloud.","Play the line once."]},
+    {"id":"offbeat","moduleId":"syncopation","title":"Own the offbeat","minutes":12,"kind":"rhythm","objective":"Recognize common eighth-note syncopations.","coach":"QUIET COUNT","steps":["Tap foot on numbers.","Clap only the written attacks.","Keep going after an error."]},
+    {"id":"mixed-review","moduleId":"syncopation","title":"Interleaved rhythm set","minutes":12,"kind":"rhythm","objective":"Switch among familiar rhythm types.","coach":"AUTO UP/DOWN","steps":["Preview for 20 seconds.","Play each line once.","Log the error type, not just the score."]},
+    {"id":"sixteenth-grid","moduleId":"sixteenths","title":"The 1-e-&-a grid","minutes":12,"kind":"rhythm","objective":"Decode sixteenth-note positions.","coach":"CHANGE UP","steps":["Speak the full grid.","Mute selected syllables.","Play at 50 BPM."]},
+    {"id":"change-up","moduleId":"sixteenths","title":"Subdivision changes","minutes":12,"kind":"rhythm","objective":"Move between quarters, eighths, and sixteenths.","coach":"CHANGE UP","steps":["Stay relaxed.","Listen for equal spacing.","Stop if accuracy collapses."]},
+    {"id":"kit-map","moduleId":"kit","title":"Read the kit map","minutes":12,"kind":"drums","objective":"Identify snare, bass, hi-hat, and cymbal notation.","coach":"TIME CHECK","steps":["Check the notation legend.","Read each limb alone.","Say the limb before playing."]},
+    {"id":"layer-groove","moduleId":"kit","title":"Layer a groove","minutes":15,"kind":"drums","objective":"Combine hi-hat, snare, and bass layers.","coach":"TIME CHECK","steps":["Hi-hat alone.","Bass and snare alone.","Combine at a slower tempo."]},
+    {"id":"read-ahead","moduleId":"reading","title":"Read one beat ahead","minutes":12,"kind":"reading","objective":"Keep eyes ahead of the current strike.","coach":"QUIET COUNT","steps":["Preview landmarks.","Track the next beat with your eyes.","Recover at the next beat after errors."]},
+    {"id":"unseen-sets","moduleId":"reading","title":"Unseen reading sets","minutes":15,"kind":"reading","objective":"Complete three new examples without stopping.","coach":"AUTO UP/DOWN","steps":["Use genuinely new material.","One preview and one performance.","Repeat only once, then move on."]},
+    {"id":"landmarks","moduleId":"piano","title":"Five landmark pitches","minutes":8,"kind":"pitch","objective":"Map Middle C, treble G/C, and bass F/C.","coach":"Virtual keyboard","steps":["Name the note.","Find it on a keyboard diagram.","Draw it from memory."]},
+    {"id":"interval-shapes","moduleId":"piano","title":"Read by interval","minutes":10,"kind":"pitch","objective":"Read steps, skips, and repeated notes without mnemonics.","coach":"Virtual keyboard","steps":["Name direction first.","Identify step or skip.","Play from a landmark note."]}
+  ],
+  "exercises": [
+    {"id":"q-01","lessonId":"pulse-map","difficulty":1,"meter":"4/4","tempo":60,"pattern":["q","q","q","q"],"count":"1 2 3 4"},
+    {"id":"q-02","lessonId":"quarter-grid","difficulty":1,"meter":"4/4","tempo":60,"pattern":["q","qr","q","q"],"count":"1 (2) 3 4"},
+    {"id":"e-01","lessonId":"eighth-count","difficulty":2,"meter":"4/4","tempo":60,"pattern":["ee","q","ee","q"],"count":"1 & 2 3 & 4"},
+    {"id":"e-02","lessonId":"rest-space","difficulty":2,"meter":"4/4","tempo":55,"pattern":["er-e","q","er-e","q"],"count":"(1) & 2 (3) & 4"},
+    {"id":"m-01","lessonId":"meter-shift","difficulty":2,"meter":"3/4","tempo":66,"pattern":["q","ee","q"],"count":"1 2 & 3"},
+    {"id":"s-01","lessonId":"offbeat","difficulty":3,"meter":"4/4","tempo":58,"pattern":["e-er","er-e","q","ee"],"count":"1 (&) (2) & 3 4 &"},
+    {"id":"x-01","lessonId":"sixteenth-grid","difficulty":4,"meter":"4/4","tempo":50,"pattern":["xxxx","q","xx","q"],"count":"1 e & a 2 3 & 4"},
+    {"id":"k-01","lessonId":"layer-groove","difficulty":4,"meter":"4/4","tempo":60,"pattern":["HH+BD","HH","HH+SD","HH"],"count":"1 & 2 &"}
+  ]
+}

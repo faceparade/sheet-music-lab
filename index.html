@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071513">
+  <meta name="description" content="A free, local-first course for learning rhythm, drum notation, sight-reading, and piano pitch landmarks.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%228%22 fill=%22%23091916%22/><text x=%2212%22 y=%2241%22 font-size=%2231%22 fill=%22%2371f5c1%22>♩</text></svg>">
+  <title>Sheet Music Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard" aria-label="Sheet Music Lab home">
+        <span class="brand-mark">S/M</span>
+        <span><strong>Sheet Music Lab</strong><small>Read · Hear · Play</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#dashboard" data-route="dashboard"><span>01</span> Today</a>
+        <a href="#course" data-route="course"><span>02</span> Course</a>
+        <a href="#practice" data-route="practice"><span>03</span> Rhythm Lab</a>
+        <a href="#cards" data-route="cards"><span>04</span> Recall Deck</a>
+        <a href="#resources" data-route="resources"><span>05</span> Supplies</a>
+      </nav>
+      <div class="sidebar-foot">
+        <p>8-week foundation</p>
+        <div class="mini-progress"><span id="side-progress"></span></div>
+        <small id="side-progress-label">0 of 16 lessons</small>
+      </div>
+    </aside>
+
+    <main class="main-stage">
+      <header class="topbar">
+        <button class="menu-button" id="menu-button" aria-label="Toggle navigation">Menu</button>
+        <div><span class="eyebrow">Independent study</span><strong id="page-title">Today's studio</strong></div>
+        <div class="top-actions">
+          <button class="text-button" id="reset-button">Reset progress</button>
+          <div class="streak" title="Practice streak"><span>●</span><strong id="streak-count">0</strong><small>day streak</small></div>
+        </div>
+      </header>
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+  <dialog id="lesson-dialog" class="lesson-dialog">
+    <button class="dialog-close" aria-label="Close lesson">×</button>
+    <div id="lesson-detail"></div>
+  </dialog>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

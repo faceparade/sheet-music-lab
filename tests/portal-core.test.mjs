@@ -7,7 +7,8 @@ import {
   gradeCard,
   validateCurriculum,
   auditLearningSequence,
-  auditRecallCoverage
+  auditRecallCoverage,
+  auditDrumNotation
 } from '../src/portal-core.mjs';
 import { readFile } from 'node:fs/promises';
 
@@ -49,6 +50,10 @@ test('production curriculum teaches every lesson concept before it asks for perf
 
 test('production curriculum supplies a recall card for every introduced concept', () => {
   assert.deepEqual(auditRecallCoverage(productionCurriculum, productionCards), []);
+});
+
+test('production drum key uses conventional noteheads and stacked simultaneity', () => {
+  assert.deepEqual(auditDrumNotation(productionCurriculum), []);
 });
 
 test('progress is based on unique completed lesson ids', () => {

@@ -1,4 +1,4 @@
-import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum, auditLearningSequence, auditRecallCoverage } from './portal-core.mjs';
+import { buildSession, calculateProgress, getDueCards, gradeCard, validateCurriculum, auditLearningSequence, auditRecallCoverage, auditDrumNotation } from './portal-core.mjs';
 
 const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/curriculum.json').then(assertResponse).then(r => r.json()),
@@ -6,7 +6,7 @@ const [curriculum, cards, resources] = await Promise.all([
   fetch('./data/resources.json').then(assertResponse).then(r => r.json())
 ]);
 
-const errors = [...validateCurriculum(curriculum), ...auditLearningSequence(curriculum), ...auditRecallCoverage(curriculum, cards)];
+const errors = [...validateCurriculum(curriculum), ...auditLearningSequence(curriculum), ...auditRecallCoverage(curriculum, cards), ...auditDrumNotation(curriculum)];
 if (errors.length) throw new Error(errors.join('\n'));
 
 const STORAGE_KEY = 'sheet-music-lab-state-v1';
@@ -36,6 +36,25 @@ function saveState() {
 function today() { return new Date().toISOString().slice(0, 10); }
 function esc(value = '') {
   return String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
+}
+const drumPositions = { crash: 12, hihat: 22, ride: 32, highTom: 40, snare: 56, midTom: 64, floorTom: 72, bass: 82 };
+function drumNoteMarkup(voice, x, { stem = true, dot = false, tie = false } = {}) {
+  const y = drumPositions[voice] ?? drumPositions.snare;
+  const cymbal = ['crash', 'hihat', 'ride'].includes(voice);
+  const head = cymbal
+    ? `<path class="notehead-x" d="M${x - 5} ${y - 5}L${x + 5} ${y + 5}M${x + 5} ${y - 5}L${x - 5} ${y + 5}"/>`
+    : `<ellipse class="notehead" cx="${x}" cy="${y}" rx="6" ry="4.5"/>`;
+  const stemMarkup = stem ? `<path class="stem" d="M${x + 5} ${y}V${y - 28}"/>` : '';
+  const dotMarkup = dot ? `<circle class="augmentation-dot" cx="${x + 12}" cy="${y}" r="2.2"/>` : '';
+  const tieMarkup = tie ? `<path class="tie" d="M${x + 7} ${y + 7}Q${x + 25} ${y + 17} ${x + 43} ${y + 7}"/>` : '';
+  return `${head}${stemMarkup}${dotMarkup}${tieMarkup}`;
+}
+function staffMarkup(events = [], { label = 'Drum-set notation example', rest = '', tie = false, dot = false } = {}) {
+  const lines = [36, 48, 60, 72, 84].map(y => `<line class="staff-line" x1="10" y1="${y}" x2="230" y2="${y}"/>`).join('');
+  const noteEvents = events.length ? events : [{ voice: 'snare', x: 72 }];
+  const notes = noteEvents.map(event => drumNoteMarkup(event.voice, event.x ?? 72, { dot: event.dot || dot, tie: event.tie || tie })).join('');
+  const restMarkup = rest ? `<text class="rest-glyph" x="72" y="68">${esc(rest)}</text>` : '';
+  return `<svg class="staff-notation" viewBox="0 -20 240 124" role="img" aria-label="${esc(label)}"><title>${esc(label)}</title>${lines}${notes}${restMarkup}</svg>`;
 }
 function markPractice() {
   const current = today();
@@ -138,8 +157,19 @@ function renderKitGuide() {
 
 function renderLegend() {
   setTitle('Notation legend');
-  const rows = [['♩','Quarter note','One sound for one beat.'],['𝄽','Quarter rest','One beat of silence; keep counting.'],['♫','Paired eighths','Two equal sounds: “1 &”.'],['×','Cymbal notehead','In this course, usually a hi-hat, crash, or ride; check its position.'],['◆','Snare note','Strike the center snare pad.'],['●','Bass-drum note','Press the kick pedal.'],['× + ●','Stacked notes','Play both targets at the same time.'],['♩⌒♩','Tie','Hold the time across two notes; do not strike again.'],['♩.','Dot','Adds half the note’s value.']];
-  view.innerHTML = `<div class="intro"><span class="kicker">Keep this nearby</span><h1>Read the marks used in this course.</h1><p>A measure is one small group of beats between barlines. In 4/4, count four steady beats: 1 2 3 4. Other drum books can use different placements, so always check that chart’s legend.</p></div><section class="legend-grid">${rows.map(([mark,name,meaning]) => `<article class="legend-item"><strong>${mark}</strong><div><h3>${name}</h3><p>${meaning}</p></div></article>`).join('')}</section><div class="priority-panel panel"><span>WHEN YOU SEE A NEW MARK</span><h2>Say it before you play it.</h2><p>Name the mark, identify the TD-07 target, rehearse the motion once, then add it to the count.</p><a class="button" href="#cards">Practice recall now</a></div>`;
+  const rows = [
+    [staffMarkup([{ voice: 'snare', x: 76 }], { label: 'Regular oval notehead at the snare position' }), 'Snare', 'A regular oval notehead in this course’s middle snare position. Strike the center TD-07 snare pad.'],
+    [staffMarkup([{ voice: 'bass', x: 76 }], { label: 'Regular oval notehead at the bass drum position' }), 'Bass drum / kick', 'The same regular oval notehead, written low in the staff. Press the TD-07 kick pedal.'],
+    [staffMarkup([{ voice: 'hihat', x: 76 }], { label: 'X notehead at the closed hi-hat position' }), 'Closed hi-hat', 'An x-shaped cymbal notehead. Keep the hi-hat pedal down and strike the left cymbal pad.'],
+    [staffMarkup([{ voice: 'ride', x: 76 }], { label: 'X notehead at the ride position' }), 'Ride cymbal', 'An x-shaped cymbal notehead in this course’s ride position. Strike the right ride pad.'],
+    [staffMarkup([{ voice: 'crash', x: 76 }], { label: 'X notehead at the crash position' }), 'Crash cymbal', 'An x-shaped cymbal notehead high above the staff. Strike the right crash pad and let it ring.'],
+    [staffMarkup([{ voice: 'hihat', x: 76 }, { voice: 'bass', x: 76 }], { label: 'Hi-hat and bass drum vertically stacked on the same beat' }), 'Together: vertical stack', 'Notes sharing one vertical beat position happen together. This is not a plus sign between symbols.'],
+    [staffMarkup([], { label: 'Quarter rest on a five-line percussion staff', rest: '𝄽' }), 'Quarter rest', 'One beat of silence. Keep counting; do not strike a pad.'],
+    [staffMarkup([{ voice: 'snare', x: 64 }, { voice: 'snare', x: 116 }], { label: 'Tie connecting two snare notes', tie: true }), 'Tie', 'The curved line joins same-position notes into one duration: attack only the first note.'],
+    [staffMarkup([{ voice: 'snare', x: 76, dot: true }], { label: 'Dotted snare note' }), 'Dot', 'The dot immediately after a note adds half of that note’s value.'],
+    ['♩ · ♫', 'Rhythm values', 'Quarter notes, paired eighths, beams, and rests tell you when to play. The staff position and notehead tell you what to play.']
+  ];
+  view.innerHTML = `<div class="intro"><span class="kicker">Course drum key · keep this nearby</span><h1>Read the marks used in this course.</h1><p>Each picture is a real five-line percussion-staff example: first identify the notehead and position, then name the TD-07 target and action. A measure is one group of beats between barlines; in 4/4 count 1 2 3 4.</p></div><section class="notation-principle panel"><strong>OUR BEGINNER HOUSE STYLE</strong><p>Regular oval noteheads are drums; x noteheads are cymbals. The vertical position identifies the kit voice, and vertically aligned notes happen together. This is a common drum-set layout, not a universal law: publisher keys and editable notation-software drum maps can differ. Always check a new chart’s key.</p></section><section class="legend-grid">${rows.map(([mark, name, meaning]) => `<article class="legend-item"><div class="notation-sample">${mark}</div><div><h3>${name}</h3><p>${meaning}</p></div></article>`).join('')}</section><div class="priority-panel panel"><span>WHEN YOU SEE A NEW MARK</span><h2>Say it before you play it.</h2><p>Name the mark, identify the TD-07 target, rehearse the motion once, then add it to the count.</p><a class="button" href="#cards">Practice recall now</a></div>`;
 }
 
 function renderHelp() {
@@ -193,7 +223,18 @@ function renderPractice() {
       </aside>
     </div>`;
   let current = exercises[0];
-  const glyph = { q:'♩', qr:'𝄽', ee:'♫', 'er-e':'𝄾 ♪', 'e-er':'♪ 𝄾', xxxx:'♬♬', xx:'♬', 'HH+BD':'× + ●', HH:'×', 'HH+SD':'× + ◆' };
+  const rhythmGlyph = { q:'♩', qr:'𝄽', ee:'♫', 'er-e':'𝄾 ♪', 'e-er':'♪ 𝄾', xxxx:'♬♬', xx:'♬' };
+  function exerciseNotation() {
+    const width = 420;
+    const lines = [36, 48, 60, 72, 84].map(y => `<line class="staff-line" x1="12" y1="${y}" x2="${width - 12}" y2="${y}"/>`).join('');
+    const beatWidth = (width - 44) / current.pattern.length;
+    const notes = current.pattern.map((token, index) => {
+      const x = 34 + index * beatWidth;
+      const voices = token === 'HH+BD' ? ['hihat', 'bass'] : token === 'HH' ? ['hihat'] : token === 'HH+SD' ? ['hihat', 'snare'] : [];
+      return voices.map(voice => drumNoteMarkup(voice, x)).join('') || `<text class="rhythm-glyph" x="${x}" y="66">${esc(rhythmGlyph[token] || token)}</text>`;
+    }).join('');
+    return `<svg class="exercise-notation" viewBox="0 -20 ${width} 124" role="img" aria-label="${esc(current.id)} drum reading exercise"><title>${esc(current.id)} drum reading exercise</title>${lines}${notes}</svg>`;
+  }
   function chooseExercise() {
     const level = document.querySelector('#difficulty').value;
     const pool = level === 'all' ? exercises : exercises.filter(item => String(item.difficulty) === level);
@@ -204,9 +245,8 @@ function renderPractice() {
   }
   function drawExercise(reveal) {
     const stage = document.querySelector('#notation-stage');
-    const beats = current.pattern.map(token => `<span class="beat">${esc(glyph[token] || token)}</span>`).join('');
     const counts = current.count.split(' ').slice(0, current.pattern.length).map(value => `<span>${esc(value)}</span>`).join('');
-    stage.innerHTML = `<div class="notation-meta"><span>${esc(current.meter)}</span><span>EXERCISE ${esc(current.id.toUpperCase())}</span></div><div class="rhythm-line">${beats}</div>${reveal ? `<div class="count-line">${counts}</div>` : ''}`;
+    stage.innerHTML = `<div class="notation-meta"><span>${esc(current.meter)}</span><span>EXERCISE ${esc(current.id.toUpperCase())}</span></div>${exerciseNotation()}${reveal ? `<div class="count-line">${counts}</div>` : ''}`;
     const lesson = curriculum.lessons.find(item => item.id === current.lessonId);
     document.querySelector('#exercise-title').textContent = lesson?.title || 'Reading line';
     document.querySelector('#coach-mode').textContent = `TD-07 · ${lesson?.coach || 'TIME CHECK'}`;

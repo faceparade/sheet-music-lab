@@ -58,6 +58,27 @@ export function auditRecallCoverage(curriculum, cards) {
   return [...conceptIds].filter(id => !cardIds.has(id)).map(id => `Missing recall card for ${id}`);
 }
 
+export function auditDrumNotation(curriculum) {
+  const errors = [];
+  const kitLesson = curriculum.lessons.find(lesson => lesson.id === 'kit-map');
+  if (!kitLesson) return ['Missing kit-map lesson'];
+  const concepts = new Map((kitLesson.introduces || []).map(concept => [concept.id, concept]));
+  for (const id of ['snare', 'bass-drum', 'closed-hi-hat', 'crash-cymbal', 'ride-cymbal', 'tom-voices']) {
+    if (!concepts.has(id)) errors.push(`kit-map must introduce ${id}`);
+  }
+  for (const id of ['snare', 'bass-drum', 'tom-voices']) {
+    const symbol = concepts.get(id)?.symbol?.toLowerCase() || '';
+    if (!symbol.includes('oval')) errors.push(`${id} must teach a regular oval notehead`);
+  }
+  for (const id of ['closed-hi-hat', 'crash-cymbal', 'ride-cymbal']) {
+    const symbol = concepts.get(id)?.symbol?.toLowerCase() || '';
+    if (!symbol.includes('x-shaped')) errors.push(`${id} must teach an x-shaped notehead`);
+  }
+  const layered = curriculum.lessons.find(lesson => lesson.id === 'layer-groove')?.introduces?.find(concept => concept.id === 'layered-groove');
+  if (!layered?.symbol?.toLowerCase().includes('stacked')) errors.push('layered-groove must teach vertically stacked notes');
+  return errors;
+}
+
 export function calculateProgress(curriculum, completedLessons = []) {
   if (!curriculum.lessons.length) return 0;
   const validIds = new Set(curriculum.lessons.map(lesson => lesson.id));

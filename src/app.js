@@ -88,8 +88,8 @@ function renderDashboard() {
         <h1>Turn marks on a page into motion.</h1>
         <p class="lede">A practical reading course built around your TD-07: recall the symbol, hear the rhythm, play through it, then use Coach mode for honest timing feedback.</p>
         <div class="hero-actions">
-          <button class="button" data-open-lesson="${esc(lesson.id)}">Begin: ${esc(lesson.title)}</button>
-          <a class="button secondary" href="#practice">Open rhythm lab</a>
+          <a class="button" href="#cards">Begin: Recall the symbols</a>
+          <button class="button secondary" data-open-lesson="${esc(lesson.id)}">Then: ${esc(lesson.title)}</button>
         </div>
       </article>
       <aside class="session-panel panel">
